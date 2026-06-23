@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TO BE or HAVE GOT?</title>
+<style>
+:root{
+  --ink:#1f2550;
+  --blue:#2393e6;
+  --purple:#8954dc;
+  --cream:#fff9ef;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;font-family:"Trebuchet MS",Arial,sans-serif;color:var(--ink);}
+body{background:linear-gradient(135deg,#65c7ff 0%,#c8f1ff 48%,#fff0c9 100%);display:flex;align-items:center;justify-content:center;}
+#app{width:min(1180px,100vw);height:min(700px,100vh);padding:10px;display:flex;flex-direction:column;gap:8px;}
+.topbar{height:60px;display:grid;grid-template-columns:auto minmax(260px,1fr) auto;align-items:center;gap:14px;overflow:visible;}
+.title{font-size:30px;font-weight:900;text-align:center;color:white;text-shadow:0 3px 0 #2262a8,0 6px 12px rgba(0,0,0,.25);letter-spacing:.4px;}
+.score{justify-self:end;background:rgba(255,255,255,.95);border:3px solid #ffd36c;border-radius:20px;padding:8px 18px;font-size:23px;font-weight:900;box-shadow:0 4px 0 rgba(80,70,40,.18);white-space:nowrap;line-height:1.05;}
+.navBtns{display:flex;gap:8px;align-items:center;}
+.topActions{display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:nowrap;min-width:max-content;}
+.btn{border:0;border-radius:18px;padding:10px 18px;font-size:18px;font-weight:900;color:#fff;background:linear-gradient(#bd75ff,#7d45ca);box-shadow:0 4px 0 #6331a4,0 7px 16px rgba(0,0,0,.18);cursor:pointer;}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 #6331a4;}
+.btn.secondary{background:linear-gradient(#74bdff,#287ed7);box-shadow:0 4px 0 #1f62a7,0 7px 16px rgba(0,0,0,.16);}
+.btn.hidden{display:none;}
+#rounds{flex:1;min-height:0;position:relative;}
+.round{position:absolute;inset:0;display:none;grid-template-columns:36% 64%;gap:10px;}
+.round.active{display:grid;}
+.panel{background:rgba(255,250,240,.95);border:4px solid rgba(255,255,255,.95);border-radius:26px;box-shadow:0 7px 0 rgba(52,108,182,.18),0 10px 24px rgba(0,0,0,.14);overflow:hidden;position:relative;}
+.left{padding:10px;display:flex;flex-direction:column;gap:8px;align-items:center;}
+.badge{font-size:24px;font-weight:900;color:white;padding:3px 24px;border-radius:12px;background:linear-gradient(#c77cff,#8952db);text-shadow:0 2px 0 rgba(0,0,0,.34);box-shadow:0 3px 0 rgba(70,20,150,.34);}
+.characterBox{width:100%;flex:1;min-height:0;border-radius:22px;background:linear-gradient(180deg,#fffef9,#fff2d2);display:flex;align-items:center;justify-content:center;padding:6px;}
+.char{max-width:100%;max-height:100%;object-fit:contain;display:block;}
+.char.girl{max-height:98%;}
+.char.boy{max-height:99%;}
+.char.monster{max-height:96%;}
+.char.family{max-height:102%; max-width:106%;}
+.right{padding:10px;display:grid;grid-template-rows:225px minmax(0,1fr) 48px;gap:8px;}
+.baskets{display:grid;grid-template-columns:1fr 1fr;gap:14px;min-height:0;}
+.basketWrap{position:relative;border:3px dashed rgba(68,80,130,.25);border-radius:24px;background:rgba(255,255,255,.38);overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.basketWrap.correctFlash{animation:good .35s ease;}
+@keyframes good{50%{background:#dfffcb;transform:scale(1.015)}}
+.basketImg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;opacity:.96;}
+.dropCards{position:relative;z-index:2;width:92%;height:78%;display:flex;flex-wrap:wrap;gap:4px;justify-content:center;align-content:flex-end;padding-top:86px;pointer-events:none;}
+.dropCards .card{width:64px;height:90px;pointer-events:auto;box-shadow:0 3px 6px rgba(0,0,0,.22);border-radius:10px;}
+.cards{border-radius:22px;background:rgba(255,255,255,.56);display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:1fr;gap:8px 12px;align-items:center;justify-items:center;padding:8px;min-height:0;}
+.cards.five{grid-template-columns:repeat(5,1fr);}
+.card{width:132px;height:178px;object-fit:contain;border-radius:14px;background:transparent;cursor:grab;touch-action:none;user-select:none;transition:transform .16s,opacity .16s,filter .16s;}
+.round[data-idx="0"] .cards .card,.round[data-idx="1"] .cards .card{width:112px;height:150px;}
+.round[data-idx="0"] .cards,.round[data-idx="1"] .cards{gap:7px 10px;padding:6px 8px;align-content:center;}
+.card:hover{transform:translateY(-3px) scale(1.02);}
+.card.done{opacity:.95;filter:saturate(1.08);}
+.card.wrong{animation:shake .25s ease;}
+.status{height:48px;border-radius:17px;background:linear-gradient(#b47bff,#8050d3);color:white;font-size:23px;font-weight:900;display:flex;align-items:center;justify-content:center;text-shadow:0 2px 0 rgba(0,0,0,.25);}
+.nextBox{position:absolute;inset:0;background:rgba(255,255,255,.88);display:none;align-items:center;justify-content:center;flex-direction:column;gap:18px;z-index:20;text-align:center;}
+.nextBox.show{display:flex;}
+.nextText{font-size:44px;font-weight:900;color:#6b42c8;text-shadow:0 2px 0 white;}
+/* Round 3 */
+.quiz{padding:10px;display:grid;grid-template-rows:1fr 48px;gap:8px;}
+.questions{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-content:center;}
+.q{border:2px solid #ffc36a;border-radius:16px;background:#fffdf8;padding:8px;display:grid;gap:7px;box-shadow:0 3px 0 rgba(234,145,20,.18);}
+.sentence{font-size:19px;font-weight:900;text-align:center;white-space:nowrap;}
+.blankLine{display:inline-block;width:52px;border-bottom:4px solid #26325d;transform:translateY(-4px);margin:0 5px;}
+.answers{display:flex;justify-content:center;gap:7px;}
+.answer{border:0;border-radius:11px;color:white;font-weight:900;font-size:15px;padding:7px 12px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.25);}
+.answer[data-v="is"]{background:linear-gradient(#7fe24e,#37b82e)}
+.answer[data-v="are"]{background:linear-gradient(#ffc141,#ff921d)}
+.answer[data-v="has got"]{background:linear-gradient(#54b4ff,#197de1)}
+.q.ok{background:#e8ffd8;border-color:#7ad049;}
+.q.ok .blankLine{border:0;width:auto;transform:none;margin:0;color:#2d9c24;}
+.q.wrong{animation:shake .28s ease;}
+@keyframes shake{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-4px)}}
+.finish{display:none;position:fixed;inset:0;z-index:50;background:linear-gradient(135deg,#794ad8,#f9d46b);align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:14px;}
+.finish.show{display:flex;}
+.finishCard{height:min(82vh,720px);max-width:94vw;aspect-ratio:1016/1024;border-radius:30px;overflow:hidden;box-shadow:0 12px 36px rgba(0,0,0,.32);background:white;}
+.finishCard img{width:100%;height:100%;object-fit:contain;display:block;}
+.restartBtn{border:0;border-radius:22px;padding:13px 28px;font-size:24px;font-weight:900;color:#fff;background:linear-gradient(#74bdff,#287ed7);box-shadow:0 5px 0 #1f62a7,0 10px 22px rgba(0,0,0,.22);cursor:pointer;text-shadow:0 2px 0 rgba(0,0,0,.25);}
+.musicBtn{justify-self:end;border:0;border-radius:18px;padding:10px 14px;font-size:18px;font-weight:900;color:#fff;background:linear-gradient(#ffbf4d,#ff8d24);box-shadow:0 4px 0 #c86915,0 7px 16px rgba(0,0,0,.18);cursor:pointer;white-space:nowrap;line-height:1.05;}
+@media (max-width:1000px),(max-height:640px){
+  #app{height:100vh;padding:12px 8px 8px}.topbar{height:56px;grid-template-columns:auto minmax(210px,1fr) auto}.title{font-size:22px}.score{font-size:18px;padding:7px 12px}.btn{font-size:15px;padding:8px 12px}
+  .badge{font-size:19px}.right{grid-template-rows:180px minmax(0,1fr) 40px}.card{height:132px;width:min(98px,100%)}.dropCards .card{width:52px;height:72px}.status{height:40px;font-size:18px}.sentence{font-size:16px}.answer{font-size:13px;padding:5px 9px}.q{padding:6px}.questions{gap:6px}.nextText{font-size:34px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <div class="navBtns"><button class="btn secondary" id="resetBtn">↻ Reset</button></div>
+    <div class="title">TO BE or HAVE GOT?</div>
+    <div class="topActions"><button class="musicBtn" id="musicBtn">🎵 Music</button><div class="score">Score: <span id="score">0</span> / 17 ⭐</div></div>
+  </div>
+  <div id="rounds"></div>
+</div>
+<div class="finish" id="finish">
+  <div class="finishCard"><img src="assets/victory.png" alt="You did it"></div>
+  <button class="restartBtn" id="restartFinish">Start again</button>
+</div>
+<audio id="bgMusic" src="assets/music.mp3" loop preload="auto"></audio>
+<script>
+const AS='assets/';
+let score=0, current=0;
+let audioCtx=null, musicOn=false;
+const bgMusic=document.getElementById('bgMusic');
+bgMusic.volume=0.12;
+function getAudio(){audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); return audioCtx;}
+function beep(freq=720, dur=.12, type='sine', vol=.06){try{const ctx=getAudio(); const o=ctx.createOscillator(); const g=ctx.createGain(); o.type=type; o.frequency.value=freq; g.gain.value=vol; o.connect(g); g.connect(ctx.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+dur); o.stop(ctx.currentTime+dur);}catch(e){}}
+function correctSound(){beep(780,.09,'sine',.055); setTimeout(()=>beep(1040,.11,'sine',.05),75)}
+function roundSound(){beep(650,.10,'triangle',.055); setTimeout(()=>beep(820,.10,'triangle',.05),95); setTimeout(()=>beep(980,.16,'triangle',.05),190)}
+function toggleMusic(){const btn=document.getElementById('musicBtn'); if(!musicOn){musicOn=true; btn.textContent='🔇 Music'; bgMusic.currentTime=0; bgMusic.play().catch(()=>{});}else{musicOn=false; btn.textContent='🎵 Music'; bgMusic.pause();}}
+const rounds=[
+ {title:'ROUND 1', type:'sort', character:'girl.png', charClass:'girl', buckets:[['to be','basket_tobe.png'],['have got','basket_havegot.png']], cards:[
+  ['r1_doll.png','have got'],['r1_blue_eyes.png','have got'],['r1_happy.png','to be'],['r1_hungry.png','to be'],['r1_long_hair.png','have got'],['r1_sandwich.png','have got']]},
+ {title:'ROUND 2', type:'sort', character:'boy.png', charClass:'boy', buckets:[['to be','basket_tobe.png'],['have got','basket_havegot.png']], cards:[
+  ['r2_pencil_case.png','have got'],['r2_ruler.png','have got'],['r2_short_brown_hair.png','have got'],['r2_tall.png','to be'],['r2_tired.png','to be'],['r2_school_bag.png','have got']]},
+ {title:'ROUND 3', type:'quiz', character:'monster.png', charClass:'monster', questions:[
+  ['It','green.','is'],['It','happy.','is'],['It','three eyes.','has got'],['The eyes','big.','are'],['It','long arms.','has got'],['The arms','long.','are']]},
+ {title:'ROUND 4', type:'sort', character:'family.png', charClass:'family', buckets:[['are','basket_tobe.png'],['have got','basket_havegot.png']], cards:[
+  ['r4_happy.png','are'],['r4_purple.png','are'],['r4_big_ears.png','have got'],['r4_long_tails.png','have got'],['r4_pet_dragon.png','have got']]}
+];
+function updateScore(){document.getElementById('score').textContent=score;}
+function updateBack(){}
+function build(){
+ const root=document.getElementById('rounds'); root.innerHTML='';
+ rounds.forEach((r,i)=>{
+  const el=document.createElement('section'); el.className='round '+(i===0?'active':''); el.dataset.idx=i;
+  const left=document.createElement('div'); left.className='panel left';
+  left.innerHTML=`<div class="badge">${r.title}</div><div class="characterBox"><img class="char ${r.charClass}" src="${AS+r.character}" alt=""></div>`;
+  el.appendChild(left);
+  const right=document.createElement('div'); right.className='panel '+(r.type==='quiz'?'quiz':'right');
+  if(r.type==='sort'){
+    const baskets=document.createElement('div'); baskets.className='baskets';
+    r.buckets.forEach(([name,img])=>{
+      const b=document.createElement('div'); b.className='basketWrap'; b.dataset.accept=name;
+      b.innerHTML=`<img class="basketImg" src="${AS+img}" alt="${name}"><div class="dropCards"></div>`;
+      baskets.appendChild(b);
+    });
+    const cards=document.createElement('div'); cards.className='cards '+(r.cards.length===5?'five':'');
+    r.cards.forEach(([img,ans],ci)=>{
+      const c=document.createElement('img'); c.className='card'; c.src=AS+img; c.draggable=true; c.dataset.answer=ans; c.dataset.id=`r${i}c${ci}`; c.alt='';
+      cards.appendChild(c);
+    });
+    const status=document.createElement('div'); status.className='status'; status.textContent=`0 / ${r.cards.length} ⭐`;
+    right.append(baskets,cards,status);
+  } else {
+    const qs=document.createElement('div'); qs.className='questions';
+    r.questions.forEach(([subj,rest,ans])=>{
+      const q=document.createElement('div'); q.className='q'; q.dataset.answer=ans;
+      q.innerHTML=`<div class="sentence">${subj} <span class="blankLine"></span> ${rest}</div><div class="answers"><button class="answer" data-v="is">IS</button><button class="answer" data-v="are">ARE</button><button class="answer" data-v="has got">HAS GOT</button></div>`;
+      qs.appendChild(q);
+    });
+    const status=document.createElement('div'); status.className='status'; status.textContent='0 / 6 ⭐';
+    right.append(qs,status);
+  }
+  const next=document.createElement('div'); next.className='nextBox'; next.innerHTML=`<div class="nextText">Great job!</div><button class="btn nextBtn">${i===rounds.length-1?'Finish':'Next Round'}</button>`;
+  el.append(right,next); root.appendChild(el);
+ });
+ enableDnD(); enableQuiz(); updateBack();
+}
+function setRound(n){current=n; document.querySelectorAll('.round').forEach((el,i)=>el.classList.toggle('active',i===n)); updateBack();}
+function roundComplete(el){roundSound(); el.querySelector('.nextBox').classList.add('show');}
+function checkSortRound(roundEl){
+ const r=rounds[+roundEl.dataset.idx]; const done=roundEl.querySelectorAll('.card.done').length;
+ roundEl.querySelector('.status').textContent=`${done} / ${r.cards.length} ⭐`;
+ if(done===r.cards.length) roundComplete(roundEl);
+}
+function enableDnD(){
+ let dragged=null, selected=null;
+ document.querySelectorAll('.card').forEach(card=>{
+   card.addEventListener('dragstart',e=>{dragged=card; e.dataTransfer.setData('text/plain',card.dataset.id); setTimeout(()=>card.style.opacity=.45,0);});
+   card.addEventListener('dragend',()=>{if(dragged) dragged.style.opacity=1; dragged=null;});
+   card.addEventListener('click',()=>{if(card.classList.contains('done')) return; if(selected) selected.style.outline=''; selected=card; card.style.outline='5px solid #ffd642';});
+ });
+ document.querySelectorAll('.basketWrap').forEach(b=>{
+   b.addEventListener('dragover',e=>e.preventDefault());
+   b.addEventListener('drop',e=>{e.preventDefault(); placeCard(dragged,b);});
+   b.addEventListener('click',()=>{if(selected) placeCard(selected,b,true);});
+ });
+ function placeCard(card,b,clicked=false){
+   if(!card||card.classList.contains('done')) return;
+   if(card.dataset.answer===b.dataset.accept){
+     b.querySelector('.dropCards').appendChild(card); card.classList.add('done'); card.style.outline=''; card.style.opacity=1; score++; updateScore(); correctSound(); b.classList.add('correctFlash'); setTimeout(()=>b.classList.remove('correctFlash'),350); checkSortRound(b.closest('.round')); selected=null;
+   } else {
+     card.classList.add('wrong'); card.style.outline='5px solid #ff5b5b'; setTimeout(()=>{card.classList.remove('wrong'); if(clicked && selected===card) card.style.outline='5px solid #ffd642'; else card.style.outline='';},300);
+   }
+ }
+}
+function enableQuiz(){
+ document.querySelectorAll('.answer').forEach(btn=>btn.addEventListener('click',()=>{
+  const q=btn.closest('.q'); if(q.classList.contains('ok')) return;
+  const val=btn.dataset.v;
+  if(val===q.dataset.answer){
+    q.classList.add('ok'); q.querySelector('.blankLine').textContent=q.dataset.answer.toUpperCase(); score++; updateScore(); correctSound();
+    const round=q.closest('.round'); const ok=round.querySelectorAll('.q.ok').length; round.querySelector('.status').textContent=`${ok} / 6 ⭐`; if(ok===6) roundComplete(round);
+  } else {q.classList.add('wrong'); setTimeout(()=>q.classList.remove('wrong'),300);}
+ }));
+ document.querySelectorAll('.nextBtn').forEach(btn=>btn.addEventListener('click',()=>{const idx=+btn.closest('.round').dataset.idx; if(idx===rounds.length-1){document.getElementById('finish').classList.add('show')} else setRound(idx+1);}));
+}
+function reset(){score=0; updateScore(); document.getElementById('finish').classList.remove('show'); build(); setRound(0);}
+document.getElementById('resetBtn').addEventListener('click',reset);
+document.getElementById('restartFinish').addEventListener('click',reset);
+document.getElementById('musicBtn').addEventListener('click',toggleMusic);
+build();
+</script>
+</body>
+</html>
